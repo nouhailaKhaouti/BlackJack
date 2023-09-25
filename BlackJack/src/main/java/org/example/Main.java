@@ -186,34 +186,25 @@ public class Main {
         return shuffle;
     }
 
-    public static List<int[][]> startPlay(int[][] cards){
-        int[][] botCard = Arrays.copyOfRange(cards, 0, 2);
-        int[][] playerCard = Arrays.copyOfRange(cards, 2, 4);
-        int[][] newCards = Arrays.copyOfRange(cards, 4, cards.length);
+    public static List<int[][]> draw_n_card(int[][] cards,int n){
+        int[][] PlayCard = Arrays.copyOfRange(cards, 0, n);
+        int[][] newCards = Arrays.copyOfRange(cards, n, cards.length);
 
         List<int[][]> listCards = new ArrayList<>();
-        listCards.add(playerCard);
-        listCards.add(botCard);
+        listCards.add(PlayCard);
         listCards.add(newCards);
 
         return listCards;
     }
 
+
+
     public void round(int[][]cards){
-        List<int[][]> startRound=startPlay(cards);
+
+        int[][] botCards=draw_n_card(cards,2).get(0);
+
+
         boolean stand=false;
-        int[][] botCards=startRound.get(0);
-        int[][] playerCards=startRound.get(1);
-        int[][] newCards=startRound.get(2);
-        System.out.println("Player cards");
-        System.out.print("{");
-        display(playerCards);
-        System.out.println("dealer first card");
-        System.out.print("{");
-            System.out.print("(");
-            System.out.print(getSuitIcon(botCards[0][1]) + "," + getCardValue(botCards[0][0]));
-            System.out.print(")");
-        System.out.print("}\n");
         while (stand){
 
             System.out.println("                         ╔████████████████████████████████╗");
