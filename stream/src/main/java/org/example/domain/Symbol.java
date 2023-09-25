@@ -1,2 +1,6 @@
-package org.example.domain;public class Symbol {
+package org.example.domain;
+
+public enum Symbol {
+
+    HEART , DIAMONDS, SPADE, CLUB
 }

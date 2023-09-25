@@ -142,6 +142,8 @@ public class Main {
         return cardIcon;
     }
 
+
+
     public static List<int[][]> extract_h_card(int indice,int[][] cards){
         List<int[][]> shufle=new ArrayList<>();
 
@@ -193,8 +195,8 @@ public class Main {
                 newCard[count]=cards[i];
                 count++;
             }else{
-                half[count]=cards[i];
-                count++;
+                half[count1]=cards[i];
+                count1++;
             }
         }
         shufle.add(newCard);
