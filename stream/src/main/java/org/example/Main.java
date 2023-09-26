@@ -13,8 +13,6 @@ public class Main {
         build.stream()
                 .forEach(System.out::println);
 
-        HashMap<Integer, List<Card>> extraireHCard = service.extraire_h_card(build, 1);
-
         System.out.println();
     }
 }

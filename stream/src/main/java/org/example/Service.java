@@ -5,10 +5,10 @@ import org.example.domain.Player;
 import org.example.domain.Symbol;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Service {
-    static Integer Score=1000;
+    static Scanner scanner=new Scanner(System.in);
+    static Integer Bank=1000;
     public List<Card> build() {
         List<Card> cards = new ArrayList<>();
         Arrays.stream(Symbol.values()).forEach(symbol -> {
@@ -20,27 +20,20 @@ public class Service {
         return cards;
     }
 
-    public HashMap<Integer, List<Card>> extraire_h_card(List<Card> cards, Integer indice) {
-
-        var cardsList = new HashMap<Integer, List<Card>>();
-
+    public Card extract_h_card(List<Card> cards, Integer indice) {
         Card remove = cards.remove(indice.intValue());
-        cardsList.put(2, cards);
-        cardsList.put(1, List.of(remove));
-        return cardsList;
+        return remove;
     }
 
-    public HashMap<Integer, List<Card>> draw_a_card(List<Card> cards) {
+    public Card draw_a_card(List<Card> cards) {
         Integer random = new Random().nextInt(cards.size() - 1);
-        return extraire_h_card(cards, random);
+        return extract_h_card(cards, random);
     }
 
     public List<Card> mixer_cards(List<Card> cards) {
         List<Card> shuffledCards = new ArrayList<>();
         while(cards.isEmpty()) {
-            HashMap<Integer, List<Card>> restOfCards = draw_a_card(cards);
-            shuffledCards.add(restOfCards.get(1).get(0));
-            cards=restOfCards.get(2);
+            shuffledCards.add(draw_a_card(cards));
         }
         return shuffledCards;
     }
@@ -81,9 +74,8 @@ public class Service {
         playerCards.stream()
                 .forEach(card -> {cards.remove(card);});
         var list=new HashMap<Integer,List<Card>>();
-        list.put(1,cards);
-        list.put(2,botCards);
-        list.put(3,playerCards);
+        list.put(1,botCards);
+        list.put(2,playerCards);
         return list;
     }
 
@@ -115,17 +107,127 @@ public class Service {
         System.out.print("}");
     }
 
+    public void displayAllCards(Player player){
+        System.out.println("\uD83C\uDFB0");
+        displayCard(player.getCards());
+        System.out.println("\uD83E\uDD16");
+    }
+
+    public Integer calculeScore(List<Card> cards){
+        final Integer[] score = {0};
+        cards.stream()
+                .filter(card->card.getValue()!=1)
+                .forEach(card->{
+                    score[0] +=  card.getValue();});
+        cards.stream()
+                .filter(card -> card.getValue()==1)
+                .forEach(card -> {
+                    if(score[0]<10){
+                        score[0]+=11;
+                    }else{
+                        score[0]+=1;
+                    }
+                });
+        return score[0];
+    }
+
+    public Integer hit(Player player,List<Card> cards){
+        var hit=extract_h_card(cards,0);
+        player.getCards().add(hit);
+        Integer score=calculeScore(player.getCards());
+        return score;
+    }
+
+    public Integer stand(Player bot,List<Card> cards){
+        Integer score=0;
+        while(!cards.isEmpty()&& score>16 ){
+            score=hit(bot,cards);
+        }
+        return score;
+    }
+
+    public void winner(Player player,Player bot){
+        if(player.getScore()> bot.getScore()&&player.getScore()<=21) {
+            System.out.println(
+                    "                              ██╗    ██╗██╗███╗   ██╗███╗   ██╗███████╗██████╗      ⠀⠀⠀⣦⠀⠀⠀⠀⠀⠀⠀⠀ ⢀⣀⣀⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀ ⢀⣤⠀⠀⠀   \n" +
+                    "                              ██║    ██║██║████╗  ██║████╗  ██║██╔════╝██╔══██╗     ⠀⠀⠀⢿⣷⣄⠀⠀⠀⠀⣴⠟⠛⠛⠉⠉⠛⠛⠻⣦⠀⠀⠀⠀⣠⣾⡿⠀⠀⠀  \n" +
+                    "                              ██║ █╗ ██║██║██╔██╗ ██║██╔██╗ ██║█████╗  ██████╔╝     ⠀⠀⠀⠸⣿⣿⣦⣄⠀⠀⣿⣦⣤⣄⣀⣀⣠⣤⣶⣿⠀⠀⣠⣼⣿⣿⠃⠀⠀⠀ \n" +
+                    "                              ██║███╗██║██║██║╚██╗██║██║╚██╗██║██╔══╝  ██╔══██╗     ⠀⢠⣄⡀⠙⢿⣿⣿⣷⡀⢻⣿⣿⣿⣿⣿⣿⣿⣿⡟⢀⣾⣿⣿⡿⠋⢀⣠⠄\n" +
+                    "                              ╚███╔███╔╝██║██║ ╚████║██║ ╚████║███████╗██║  ██║     ⠀⠀⠻⣿⣿⣶⣿⣿⣿⣧⠈⢿⣿⣿⣿⣿⣿⣿⡿⠁⣼⣿⣿⣿⣶⣿⣿⠏⠀⠀ \n" +
+                    "                               ╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝     ⠀⠀⠀⠈⠻⢿⣿⣿⣿⣿⣧⡈⠻⢿⣿⣿⡿⠟⢀⣾⣿⣿⣿⣿⡿⠟⠁⠀⠀⠀ \n" +
+                    "                                                                                    ⠀⠀⠀⠀⣀⣠⣤⣴⣿⣿⣿⡿⠂⢠⣿⣿⡄⠐⢿⣿⣿⣿⣦⣤⣄⡀⠀⠀⠀⠀\n" +
+                    "                                                                               ⠀     ⠀⠀⠀⠈⠉⠛⠛⠛⠛⠉⠀⢀⣾⣿⣿⣷⡀⠀⠉⠛⠛⠛⠛⠉⠁⠀⠀⠀⠀\n" +
+                    "                                                                                     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                    "                                                                                     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠛⠻⠟⠛⠛⠉⠀⠀");
+        }
+        if(player.getScore()< bot.getScore()&& bot.getScore()<=21){
+            System.out.println(
+                    "                                                                             ⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⣀⡀⠀⠀⠀⣀⣀⡀⠀⠀⠀⠀⠀\n" +
+                    "                                                                             ⠀⠀⠀⠀⠀⠀⡠⠊⠁⠀⠀⠀⠀⠙⢆⠉⠀⠀⠈⠳⡀⠀⠀⠀\n" +
+                    "                                                                            ⠀⠀⠀⠀⠀⡰⠁⠀⠒⠉⠁⠀⣈⣉⣺⣖⠒⠒⠒⢒⣓⡤⢄⠀\n" +
+                    "                                                                            ⠀⠀⠀⡠⢲⠁⠀⠀⠀⣠⠖⠁⢀⣀⣨⣝⣗⢈⣉⣠⣤⣸⣝⣇\n" +
+                    "                              ██╗      ██████╗ ███████╗███████╗██████╗      ⠀⢀⠎⠀⠈⠀⠀⢠⢾⣗⣂⣩⣿⣿⣻⣆⣼⣁⡀⣼⣿⣯⢮⠏\n" +
+                    "                              ██║     ██╔═══██╗██╔════╝██╔════╝██╔══██╗     ⢀⠎⠀⠀⠀⠀⠀⣸⡾⠀⠈⠉⠉⢚⡿⠉⠁⠤⣀⣀⡀⡴⠋⠀\n"+
+                    "                              ██║     ██║   ██║███████╗█████╗  ██████╔╝     ⢸⠀⠀⠀⠀⠀⠀⠙⠁⠀⠀⠐⠉⠁⠀⠀⠀⠀⠈⠀⠀⠈⢆⠀\n" +
+                    "                              ██║     ██║   ██║╚════██║██╔══╝  ██╔══██╗     ⠸⡀⠀⠀⠀⠀⠀⢠⠚⣗⡢⢄⠤⠤⡔⠤⡀⠀⢀⣀⣀⡠⢚⠆\n" +
+                    "                              ███████╗╚██████╔╝███████║███████╗██║  ██║      ⠱⣄⠀⠀⠀⠀⠈⠒⠒⠒⠋⠤⠒⠛⠥⢈⣉⠠⣤⠬⠝⠁⠀\n" +
+                    "                              ╚══════╝ ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝       ⠀⠀⠈⠑⠢⠄⣀⣀⠀........⠀⣀⡤⠊⠁⠀⠀⠀⠀\n");
+        }
+        if(player.getScore()== bot.getScore()){
+            System.out.println(
+                    "                                                              ⠀⠀⠀⠀⠀⠀⠀⠀  ⠀⠀⠀⠀⢀⣠⣾⣷⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"+
+                    "                                                             ⠀⠀⠀⠀  ⣾⠿⠿⠿⠶⠾⠿⠿⣿⣿⣿⣿⣿⣿⠿⠿⠶⠶⠿⠿⠿⣷⠀⠀⠀⠀\n"+
+                    "                                                              ⠀⠀⠀  ⣸⢿⣆⠀⠀⠀⠀⠀⠀⠀⠙⢿⡿⠉⠀⠀⠀⠀⠀⠀⠀⣸⣿⡆⠀⠀⠀\n"+
+                    "                            ████████████╗████╗██████████╗        ⢠⡟ ⠀⢻⣆⠀⠀⠀⠀⠀⠀⠀⣾⣧⠀⠀⠀⠀⠀⠀⠀⣰⡟⠀⢻⡄⠀⠀\n"+
+                    "                            ╚═══████╔═══╝████║████╔═════╝       ⠀⣾⠃ ⠀⠀⢿⡄⠀⠀⠀⠀⠀⢠⣿⣿⡀⠀⠀⠀⠀⢠⡿ ⠀⠀⠘⣷⠀\n"+
+                    "                                ████║    ████║████║            ⠀⣼⣏⣀⣀⣀⣈⣿⡀⠀⠀⠀⠀⣸⣿⣿⡇⠀⠀⠀⢀⣿⣃⣀⣀⣀⣸⣧⠀\n"+
+                    "                                ████║    ████║████████╗        ⠀⢻⣿⣿⣿⣿⣿⣿⠃⠀⠀⠀⠀⣿⣿⣿⣿⠀⠀⠀⠀⢿⣿⣿⣿⣿⣿⡿⠀\n" +
+                    "                                ████║    ████║████╔═══╝          ⠉⠛⠛⠛⠋⠁⠀⠀⠀⠀⢸⣿⣿⣿⣿⡆⠀⠀⠀⠀⠈⠙⠛⠛⠛⠉⠀⠀\n" +
+                    "                                ████║    ████║████              ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣿⣿⣿⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                    "                                ████║    ████║██████████╗             ⠀⠀⠀⠀ ⠀⣠⣾⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                    "                                ╚═══╝    ╚═══╝╚═════════╝          ⠀⠀⠀⠀⠀⠀⠀ ⣸⣿⣿⣿⣿⣿⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                    "                                                          ⠀⠀⠀⠀⠀⠀     ⠴⠶⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠶⠦⠀⠀⠀⠀⠀⠀\n");
+        }
+    }
     public void startGame(List<Card> cards){
         var list=StartRound(cards);
-
-        cards=list.get(1);
-        Player bot=new Player(Score,list.get(2));
-        Player player=new Player(Score,list.get(3));
+        boolean exit=false;
+        Player bot=new Player(Bank,list.get(2));
+        Player player=new Player(Bank,list.get(3));
         System.out.println("\uD83C\uDFB0");
         displayCard(player.getCards());
         System.out.println("\uD83E\uDD16");
         System.out.print("("+getCardValue(bot.getCards().get(0).getValue())+","+getSuitIcon(bot.getCards().get(0).getSymbol())+")");
+        while(exit) {
 
+            System.out.println("                         ╔████████████████████████████████╗");
+            System.out.println("                         ║██     1:     ♦♦♦♦  hit       ██║");
+            System.out.println("                         ║██     2:     ♥♥♥♥  Stand     ██║");
+            System.out.println("                         ╚████████████████████████████████╝");
+            System.out.print("Enter your choice: ");
+
+            if (scanner.hasNextInt()) {
+                int choice = scanner.nextInt();
+                switch (choice) {
+                    case 1:
+                        player.setScore(hit(player, cards));
+                        displayAllCards(player);
+                        System.out.print("("+getCardValue(bot.getCards().get(0).getValue())+","+getSuitIcon(bot.getCards().get(0).getSymbol())+")");
+                        break;
+                    case 2:
+                        displayAllCards(player);
+                        bot.setScore(stand(bot, cards));
+                        displayCard(bot.getCards());
+                        exit = true;
+                        break;
+                }
+            }
+        }
+        winner(player,bot);
+
+    }
+
+    public void roundLoop(){
 
     }
 }
