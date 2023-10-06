@@ -81,20 +81,21 @@ public class Service {
         return list;
     }
 
-    public void displayCard(List<Card> cards){
-        System.out.println(cards);
+    public void displayCard(Player cards){
+       String result = String.join( " ", cards.getCards().toString());
+        System.out.print(result);
     }
 
     public void displayScore(Integer score){
         System.out.println(
-                "\n                        /)/)                             (\\(\\\n" +
+                      "\n                         /)/)                             (\\(\\\n" +
                         "                        ( . .)                           (. . )\n" +
                         "                        ( づ               "+score+"                ⊂ )\n\n");
     }
 
     public void displayAllCards(Player player){
         System.out.println("\uD83C\uDFB0 \n");
-        displayCard(player.getCards());
+        displayCard(player);
         System.out.println("       Player: ");
         displayScore(player.getScore());
         System.out.println("\uD83E\uDD16 \n");
@@ -145,7 +146,7 @@ public class Service {
     public void winner(Player player,Player bot,Integer bank){
         Integer oldbank=player.getBank();
         if(player.getScore()> bot.getScore() && player.getScore()<=21 || bot.getScore()>=21 && player.getScore()<=21) {
-           player.setBank(oldbank+(bank*2));
+           player.setBank(oldbank+bank);
             System.out.println(
                     "                              ██╗    ██╗██╗███╗   ██╗███╗   ██╗███████╗██████╗      ⠀⠀⠀⣦⠀⠀⠀⠀⠀⠀⠀⠀  ⢀⣀⣀⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀ ⢀⣤⠀⠀⠀   \n" +
                     "                              ██║    ██║██║████╗  ██║████╗  ██║██╔════╝██╔══██╗     ⠀⠀⠀⢿⣷⣄⠀⠀⠀⠀ ⣴⠟⠛⠛⠉⠉⠛⠛⠻⣦⠀⠀⠀⠀⣠⣾⡿⠀⠀⠀  \n" +
@@ -157,7 +158,7 @@ public class Service {
                     "                                                                               ⠀     ⠀⠀⠀⠈⠉⠛⠛⠛⠛⠉⠀⢀⣾⣿⣿⣷⡀⠀⠉⠛⠛⠛⠛⠉⠁⠀⠀⠀⠀\n" +
                     "                                                                                     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
                     "                                                                                     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠛⠻⠟⠛⠛⠉⠀⠀");
-        }else if(player.getScore()> bot.getScore() && bot.getScore()<=21 || player.getScore()> bot.getScore() && player.getScore()>=21 && bot.getScore()<=21){
+        }else if(player.getScore()< bot.getScore() && bot.getScore()<=21 || player.getScore()> bot.getScore() && player.getScore()>=21 && bot.getScore()<=21){
             player.setBank(oldbank-bank);
             System.out.println(
                     "                                                                             ⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⣀⡀⠀⠀⠀⣀⣀⡀⠀⠀⠀⠀⠀\n" +
@@ -198,7 +199,7 @@ public class Service {
         while(!exit){
                         System.out.println("Enter a number that lower or equal to your bank balance :"+player.getBank());
                         bank=scanner.nextInt();
-                        if(bank<player.getBank()){
+                        if(bank<=player.getBank()){
                             exit=true;
                         }else{
                             System.out.println("Please enter a number lower then your bank balance:"+player.getBank());
@@ -216,7 +217,7 @@ public class Service {
 
             while (!exit) {
 
-                System.out.println("                         ╔████████████████████████████████╗");
+                System.out.println("\n                         ╔████████████████████████████████╗");
                 System.out.println("                         ║██     1:     ♦♦♦♦  hit       ██║");
                 System.out.println("                         ║██     2:     ♥♥♥♥  Stand     ██║");
                 System.out.println("                         ╚████████████████████████████████╝");
@@ -229,7 +230,7 @@ public class Service {
                             if(cards.size()!=0) {
                                 player.setScore(hit(player, cards));
                                 displayAllCards(player);
-                                bot.getCards().get(0);
+                                displayCard(bot);
                             }else {
                                 System.out.println("  No more cards to Hit");
                             exit=true;
@@ -240,8 +241,8 @@ public class Service {
                             displayAllCards(player);
                             Integer botScore = stand(bot, cards);
                             bot.setScore(botScore);
-                            displayCard(bot.getCards());
-                            System.out.println("bot score: ");
+                            displayCard(bot);
+                            System.out.println("\nBot score \uD83E\uDD16: ");
                             displayScore(bot.getScore());
                             exit = true;
                             break;
@@ -260,7 +261,7 @@ public class Service {
            player.setBank(Bank);
            Player bot=new Player();
            bot.setBank(Bank);
-           while(cards.size()>=4 && exit==false) {
+           while(cards.size()>=4 && exit==false && player.getBank()>0) {
                if(round>0){
                    System.out.println("                         ╔████████████████████████████████╗");
                    System.out.println("                         ║██     1:     ♦♦♦♦  Continue  ██║");

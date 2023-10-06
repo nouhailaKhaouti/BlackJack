@@ -34,4 +34,5 @@ public class Player {
     public void setCards(List<Card> cards) {
         this.cards = cards;
     }
+
 }
